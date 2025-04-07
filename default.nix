@@ -1,20 +1,22 @@
 # made a box64 issue https://github.com/ptitSeb/box64/issues/2478
-{ inputs, x86pkgs }:
+{ inputs, x86pkgs, self }:
 { lib, pkgs, config, ... }: let
   inherit (pkgs.stdenv.hostPlatform) system;
   cfg = config.box64-binfmt;
-in 
+in
 
 
 with lib;
 let 
   #pkgs.x86 = x86pkgs;
-  mybox64 = pkgs.callPackage ./mybox64.nix {
-    hello-x86_64 = if pkgs.stdenv.hostPlatform.isx86_64 then
-      pkgs.hello
-    else
-      pkgs.pkgsCross.gnu64.hello;
-  };
+  # mybox64 = pkgs.callPackage ./mybox64.nix {
+  #   hello-x86_64 = if pkgs.stdenv.hostPlatform.isx86_64 then
+  #     pkgs.hello
+  #   else
+  #     pkgs.pkgsCross.gnu64.hello;
+  # };
+  mybox64 = inputs.self.packages.${system}.mybox64;
+  
 
   # Grouped common libraries needed for the FHS environment (64-bit ARM versions)
   steamLibs = with pkgs; [
