@@ -46,4 +46,4 @@ Any `x86` binary you try to run will be ran with box64 in an FHS environment aut
 - Mechanism to install packages from other architectures, like `steam`, `steamcmd`, even when not supported? Maybe with `quemu`? Maybe under `pkgs.x86.<pkg>` if possible.
 - better name for bleeding edge `mybox64` that has box32 support built in, document it is installed and user can use.
 - make `ox64-fhs-bash` and `box64-fhs` be the same thing, just detect if it's a bash script to run or not
-- `steam` is still not launching, see [this issue](https://github.com/ptitSeb/box64/issues/) to track it
+- `steam` is still not launching, see [this issue](https://github.com/ptitSeb/box64/issues/2478) to track it
