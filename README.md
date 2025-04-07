@@ -40,6 +40,18 @@ box64-binfmt.enable = true;
 
 Any `x86` binary you try to run will be ran with box64 in an FHS environment automatically. You can also invoke box64 in the fhs environment directly with `box64-fhs` or `box64-fhs-bash` for bash scripts, or use `steam-fhs` to get in the fhs environment
 
+Right now you need an x86 machine to compile the wanted binary and send it to the aarch64 computer:
+```sh
+# from x86_64 machine:
+> nix-shell -p steamcmd --run "whereis steamcmd"
+steamcmd: /nix/store/v15z11yh9j1i76ql016xd02fpa32rfxk-steamcmd-20180104/bin/steamcmd
+> nix copy --to ssh://root<aarch64 server ip> /nix/store/v15z11yh9j1i76ql016xd02fpa32rfxk-steamcmd-20180104/bin/steamcmd
+
+# from aarch64 or arm (or riskV) PC
+> box64-bashx86-wrapper /nix/store/v15z11yh9j1i76ql016xd02fpa32rfxk-steamcmd-20180104/bin/steamcmd
+Steam>
+```
+
 #### Todo
 - GitHub action to auto update box64 according to the latest commits?
 - Proper README
