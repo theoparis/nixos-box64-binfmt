@@ -1,5 +1,5 @@
 # made a box64 issue https://github.com/ptitSeb/box64/issues/2478
-{ self }:
+{ inputs, x86pkgs, self }:
 { lib, pkgs, config, ... }: let
   inherit (pkgs.stdenv.hostPlatform) system;
   cfg = config.box64-binfmt;
@@ -8,7 +8,7 @@ in
 
 with lib;
 let 
-  box64-bleeding-edge = self.packages.${system}.box64-bleeding-edge;
+  box64-bleeding-edge = inputs.self.packages.${system}.box64-bleeding-edge;
 
   # Grouped common libraries needed for the FHS environment (64-bit ARM versions)
   steamLibs = with pkgs; [
@@ -490,7 +490,7 @@ let
 
 
   steamLibsMineX86_64 = let
-    crossPkgs = pkgs.x86;
+    crossPkgs = x86pkgs;
     getCrossLib = lib:
       let
         # Map problematic package names to their cross-compilation equivalents
@@ -620,7 +620,7 @@ box64-fhs-bash = pkgs.writeScriptBin "box64-bashx86-wrapper" ''
   #!${pkgs.bash}/bin/sh
   ${BOX64_VARS}
 
-  exec ${steamFHS}/bin/steam-fhs ${box64-bleeding-edge}/bin/box64-bleeding-edge ${pkgs.x86.bash}/bin/bash "$@"
+  exec ${steamFHS}/bin/steam-fhs ${box64-bleeding-edge}/bin/box64-bleeding-edge ${x86pkgs.bash}/bin/bash "$@"
 '';
 box64-fhs = pkgs.writeScriptBin "box64-wrapper" ''
   #!${pkgs.bash}/bin/sh
@@ -639,36 +639,33 @@ in {
   config = mkIf cfg.enable {
 
     # Needed to allow installing x86 packages, otherwise: error: i686 Linux package set can only be used with the x86 family
-    # nixpkgs.overlays = [
-    #   (self: super: let
-    #     pkgs.x86 = import pkgs.path {
-    #       system = "x86_64-linux";
-    #       config.allowUnfree = true;
-    #     };
-    #   in {
-    #     inherit (pkgs.x86) steam-run;
-    #     # steam steam-run
-    #     #steam steam-run;
-    #     #bashx86 = pkgs.x86.bashInteractive;
-    #     #steamx86 = pkgs.x86.steam-unwrapped;
-    #   })
-    #   (self: super: let
-    #     i686pkgs = import pkgs.path {
-    #       system = "i686-linux";
-    #       config.allowUnfree = true;
-    #     };
-    #   in {
-    #     inherit (i686pkgs) ;
-    #     #steam-run;
-    #     # steam steam-run
-    #     #steam steam-run;
-    #     #bashx86 = pkgs.x86.bashInteractive;
-    #     #steamx86 = pkgs.x86.steam-unwrapped;
-    #   })
-    # ];
-
-    # Enable x86_64 packages through the overlay
-    nixpkgs.overlays = [ self.overlays.default ];
+    nixpkgs.overlays = [
+      (self: super: let
+        x86pkgs = import pkgs.path {
+          system = "x86_64-linux";
+          config.allowUnfree = true;
+        };
+      in {
+        inherit (x86pkgs) steam-run;
+        # steam steam-run
+        #steam steam-run;
+        #bashx86 = x86pkgs.bashInteractive;
+        #steamx86 = x86pkgs.steam-unwrapped;
+      })
+      (self: super: let
+        i686pkgs = import pkgs.path {
+          system = "i686-linux";
+          config.allowUnfree = true;
+        };
+      in {
+        inherit (i686pkgs) ;
+        #steam-run;
+        # steam steam-run
+        #steam steam-run;
+        #bashx86 = x86pkgs.bashInteractive;
+        #steamx86 = x86pkgs.steam-unwrapped;
+      })
+    ];
 
     # Add these env variables to /home/yeshey/.local/share/Steam/steam.sh to get more logs when it downloaads the stuffs
     #export STEAM_DEBUG=1  # Enables set -x in steam.sh
@@ -677,13 +674,11 @@ in {
     # you made this comment in nixos discourse: https://discourse.nixos.org/t/how-to-install-steam-x86-64-on-a-pinephone-aarch64/19297/7?u=yeshey
     
     # Uncomment these lines if you need to set extra platforms for binfmt:
-    boot.binfmt.emulatedSystems = ["i686-linux" "x86_64-linux"];
+    # boot.binfmt.emulatedSystems = ["i686-linux" "x86_64-linux"];
     # nix.settings.extra-platforms = config.boot.binfmt.emulatedSystems;
-    # System configuration
-    nix.settings.extra-platforms = lib.mkForce [ "x86_64-linux" ];
-    nix.extraOptions = ''
-      extra-sandbox-paths = /run/binfmt
-    '';
+    nix.settings.extra-platforms = ["i686-linux" "x86_64-linux"];
+    nixpkgs.config.allowUnsupportedSystem = true;
+
 
     environment.systemPackages = with pkgs; let 
 
@@ -692,7 +687,7 @@ in {
         ${BOX64_VARS}
 
         exec ${steamFHS}/bin/steam-fhs ${box64-bleeding-edge}/bin/box64-bleeding-edge \
-          ${pkgs.x86.bash}/bin/bash ${pkgs.x86.steam-unwrapped}/lib/steam/bin_steam.sh \
+          ${x86pkgs.bash}/bin/bash ${x86pkgs.steam-unwrapped}/lib/steam/bin_steam.sh \
           -no-cef-sandbox \
           -cef-disable-gpu \
           -cef-disable-gpu-compositor \
@@ -706,7 +701,7 @@ in {
         ${BOX64_VARS}
 
         exec ${steamFHS}/bin/steam-fhs ${box64-bleeding-edge}/bin/box64-bleeding-edge \
-          ${pkgs.x86.bash}/bin/bash ${pkgs.x86.heroic-unwrapped}/bin/heroic
+          ${x86pkgs.bash}/bin/bash ${x86pkgs.heroic-unwrapped}/bin/heroic
       '';
 
       steamcmdx86Wrapper = pkgs.writeScriptBin "box64-bashx86-steamcmdx86-wrapper" ''
@@ -714,7 +709,7 @@ in {
         ${BOX64_VARS}
 
         exec ${steamFHS}/bin/steam-fhs ${box64-bleeding-edge}/bin/box64-bleeding-edge \
-          ${pkgs.x86.bash}/bin/bash ${pkgs.x86.steamcmd}/bin/steamcmd
+          ${x86pkgs.bash}/bin/bash ${x86pkgs.steamcmd}/bin/steamcmd
       # '';
 
     in [
@@ -723,16 +718,16 @@ in {
       box64-fhs-bash
       unstable.fex # idfk man
       #steamx86
-      pkgs.x86.steam-unwrapped
-      pkgs.x86.heroic-unwrapped
+      x86pkgs.steam-unwrapped
+      x86pkgs.heroic-unwrapped
       # steamcmdx86Wrapper
-      pkgs.x86.steamcmd
+      x86pkgs.steamcmd
       heroicx86Wrapper
       steamx86Wrapper
       #pkgs.pkgsCross.gnu32.steam
       steamFHS
       box64-bleeding-edge
-      pkgs.x86.bash #(now this one appears with whereis bash)
+      x86pkgs.bash #(now this one appears with whereis bash)
       muvm
       # additional steam-run tools
       # steam-tui steamcmd steam-unwrapped
