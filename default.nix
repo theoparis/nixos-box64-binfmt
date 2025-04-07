@@ -652,19 +652,6 @@ in {
         #bashx86 = x86pkgs.bashInteractive;
         #steamx86 = x86pkgs.steam-unwrapped;
       })
-      (self: super: let
-        i686pkgs = import pkgs.path {
-          system = "i686-linux";
-          config.allowUnfree = true;
-        };
-      in {
-        inherit (i686pkgs) ;
-        #steam-run;
-        # steam steam-run
-        #steam steam-run;
-        #bashx86 = x86pkgs.bashInteractive;
-        #steamx86 = x86pkgs.steam-unwrapped;
-      })
     ];
 
     # Add these env variables to /home/yeshey/.local/share/Steam/steam.sh to get more logs when it downloaads the stuffs
