@@ -3,28 +3,32 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, ... }@inputs: let
+  outputs = { self, nixpkgs, ... }: let
     lib = nixpkgs.lib;
-    supportedSystems = [ "aarch64-linux" "riscv64-linux" ];
-    eachSystem = f: lib.genAttrs supportedSystems (system: f system);
+    systems = [ "aarch64-linux" "riscv64-linux" ];
     
-    # Package sets for supported systems
+    x86Overlay = final: prev: {
+        x86 = import nixpkgs {
+          system = "x86_64-linux";
+          config = prev.config // {
+            allowUnsupportedSystem = true;
+            permittedInsecurePackages = prev.config.permittedInsecurePackages or [];
+          };
+        };
+      };
+
     pkgsFor = system: import nixpkgs {
       inherit system;
       config.allowUnfree = true;
+      config.allowUnsupportedSystem = true;
     };
-    
-    # Special x86 package set (not in supportedSystems)
-    x86pkgs = import nixpkgs {
-      system = "x86_64-linux";
-      config.allowUnfree = true;
-    };
-    
+
   in {
-    packages = eachSystem (system: {
+    overlays.default = x86Overlay;
+
+    packages = lib.genAttrs systems (system: {
       default = self.packages.${system}.box64-bleeding-edge;
       box64-bleeding-edge = (pkgsFor system).callPackage ./box64-bleeding-edge.nix {
         hello-x86_64 = if (pkgsFor system).stdenv.hostPlatform.isx86_64 then
@@ -34,9 +38,8 @@
       };
     });
 
-    nixosModules.default = import ./default.nix {
-      inherit inputs x86pkgs;
-      self = self; # Required for accessing packages in default.nix
+    nixosModules.default = { config, pkgs, ... }: {
+      imports = [ (import ./default.nix { inherit self; }) ];
     };
   };
 }
