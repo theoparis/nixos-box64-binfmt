@@ -1,8 +1,15 @@
 # made a box64 issue https://github.com/ptitSeb/box64/issues/2478
-{ inputs, config, pkgs, lib, ... }:
+{ lib, pkgs, config, ... }:
 
 with lib;
 let 
+  mybox64 = pkgs.callPackage ./mybox64.nix {
+    hello-x86_64 = if pkgs.stdenv.hostPlatform.isx86_64 then
+      pkgs.hello
+    else
+      pkgs.pkgsCross.gnu64.hello;
+  };
+
   # Grouped common libraries needed for the FHS environment (64-bit ARM versions)
   steamLibs = with pkgs; [
     unityhub
@@ -527,7 +534,7 @@ let
 in
 
 let
-  cfg = config.mySystem.box64;
+  cfg = config.box64-binfmt;
   BOX64_LOG = "1";
   BOX64_DYNAREC_LOG = "0";
   STEAMOS = "1";
@@ -614,19 +621,20 @@ box64-fhs-bash = pkgs.writeScriptBin "box64-bashx86-wrapper" ''
   #!${pkgs.bash}/bin/sh
   ${BOX64_VARS}
 
-  exec ${steamFHS}/bin/steam-fhs ${pkgs.mybox64}/bin/mybox64 ${pkgs.x86.bash}/bin/bash "$@"
+  exec ${steamFHS}/bin/steam-fhs ${mybox64}/bin/mybox64 ${pkgs.x86.bash}/bin/bash "$@"
 '';
 box64-fhs = pkgs.writeScriptBin "box64-wrapper" ''
   #!${pkgs.bash}/bin/sh
 
   ${BOX64_VARS}
 
-  exec ${steamFHS}/bin/steam-fhs ${pkgs.mybox64}/bin/mybox64 "$@"
+  exec ${steamFHS}/bin/steam-fhs ${mybox64}/bin/mybox64 "$@"
 '';
 in {
 
   options.box64-binfmt = {
-    binfmt.enable = mkEnableOption "box64-binfmt";
+    enable = mkEnableOption "box64-binfmt";
+    # binfmt.enable = mkEnableOption "box64-binfmt";
   };
 
   config = mkIf cfg.enable {
@@ -679,7 +687,7 @@ in {
         #!${pkgs.bash}/bin/sh
         ${BOX64_VARS}
 
-        exec ${steamFHS}/bin/steam-fhs ${pkgs.mybox64}/bin/mybox64 \
+        exec ${steamFHS}/bin/steam-fhs ${mybox64}/bin/mybox64 \
           ${pkgs.x86.bash}/bin/bash ${pkgs.x86.steam-unwrapped}/lib/steam/bin_steam.sh \
           -no-cef-sandbox \
           -cef-disable-gpu \
@@ -693,7 +701,7 @@ in {
         #!${pkgs.bash}/bin/sh
         ${BOX64_VARS}
 
-        exec ${steamFHS}/bin/steam-fhs ${pkgs.mybox64}/bin/mybox64 \
+        exec ${steamFHS}/bin/steam-fhs ${mybox64}/bin/mybox64 \
           ${pkgs.x86.bash}/bin/bash ${pkgs.x86.heroic-unwrapped}/bin/heroic
       '';
 
@@ -701,7 +709,7 @@ in {
         #!${pkgs.bash}/bin/sh
         ${BOX64_VARS}
 
-        exec ${steamFHS}/bin/steam-fhs ${pkgs.mybox64}/bin/mybox64 \
+        exec ${steamFHS}/bin/steam-fhs ${mybox64}/bin/mybox64 \
           ${pkgs.x86.bash}/bin/bash ${pkgs.x86.steamcmd}/bin/steamcmd
       # '';
 

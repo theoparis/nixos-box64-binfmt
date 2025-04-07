@@ -17,9 +17,18 @@
           config.allowUnfree = true;
         };
       in {
-        # ...
+        # Packages
+        packages.${system}.mybox64 = pkgs.callPackage ./mybox64.nix { };
+
+        # NixOS modules
+        #nixosModules.box64-binfmt = import ./default.nix inputs;
+
+        # DevShell etc. if needed
       }
     ) // {
-      nixosModules.box64-binfmt = import ./default.nix inputs;
+      nixosModules = {
+        default = import ./default.nix;
+      };
+      #nixosModules.box64-binfmt = import ./default.nix inputs; 
     };
 }
