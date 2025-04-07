@@ -1,8 +1,14 @@
 # made a box64 issue https://github.com/ptitSeb/box64/issues/2478
-{ lib, pkgs, config, ... }:
+{ inputs, x86pkgs }:
+{ lib, pkgs, config, ... }: let
+  inherit (pkgs.stdenv.hostPlatform) system;
+  cfg = config.box64-binfmt;
+in 
+
 
 with lib;
 let 
+  #pkgs.x86 = x86pkgs;
   mybox64 = pkgs.callPackage ./mybox64.nix {
     hello-x86_64 = if pkgs.stdenv.hostPlatform.isx86_64 then
       pkgs.hello
@@ -490,7 +496,7 @@ let
 
 
   steamLibsMineX86_64 = let
-    crossPkgs = pkgs.x86;
+    crossPkgs = x86pkgs;
     getCrossLib = lib:
       let
         # Map problematic package names to their cross-compilation equivalents
@@ -534,7 +540,6 @@ let
 in
 
 let
-  cfg = config.box64-binfmt;
   BOX64_LOG = "1";
   BOX64_DYNAREC_LOG = "0";
   STEAMOS = "1";
@@ -621,7 +626,7 @@ box64-fhs-bash = pkgs.writeScriptBin "box64-bashx86-wrapper" ''
   #!${pkgs.bash}/bin/sh
   ${BOX64_VARS}
 
-  exec ${steamFHS}/bin/steam-fhs ${mybox64}/bin/mybox64 ${pkgs.x86.bash}/bin/bash "$@"
+  exec ${steamFHS}/bin/steam-fhs ${mybox64}/bin/mybox64 ${x86pkgs.bash}/bin/bash "$@"
 '';
 box64-fhs = pkgs.writeScriptBin "box64-wrapper" ''
   #!${pkgs.bash}/bin/sh
@@ -688,7 +693,7 @@ in {
         ${BOX64_VARS}
 
         exec ${steamFHS}/bin/steam-fhs ${mybox64}/bin/mybox64 \
-          ${pkgs.x86.bash}/bin/bash ${pkgs.x86.steam-unwrapped}/lib/steam/bin_steam.sh \
+          ${x86pkgs.bash}/bin/bash ${x86pkgs.steam-unwrapped}/lib/steam/bin_steam.sh \
           -no-cef-sandbox \
           -cef-disable-gpu \
           -cef-disable-gpu-compositor \
@@ -702,7 +707,7 @@ in {
         ${BOX64_VARS}
 
         exec ${steamFHS}/bin/steam-fhs ${mybox64}/bin/mybox64 \
-          ${pkgs.x86.bash}/bin/bash ${pkgs.x86.heroic-unwrapped}/bin/heroic
+          ${x86pkgs.bash}/bin/bash ${x86pkgs.heroic-unwrapped}/bin/heroic
       '';
 
       steamcmdx86Wrapper = pkgs.writeScriptBin "box64-bashx86-steamcmdx86-wrapper" ''
@@ -710,7 +715,7 @@ in {
         ${BOX64_VARS}
 
         exec ${steamFHS}/bin/steam-fhs ${mybox64}/bin/mybox64 \
-          ${pkgs.x86.bash}/bin/bash ${pkgs.x86.steamcmd}/bin/steamcmd
+          ${x86pkgs.bash}/bin/bash ${x86pkgs.steamcmd}/bin/steamcmd
       # '';
 
     in [
@@ -719,16 +724,16 @@ in {
       box64-fhs-bash
       unstable.fex # idfk man
       #steamx86
-      x86.steam-unwrapped
-      x86.heroic-unwrapped
+      x86pkgs.steam-unwrapped
+      x86pkgs.heroic-unwrapped
       # steamcmdx86Wrapper
-      #pkgs.x86.steamcmd
+      x86pkgs.steamcmd
       heroicx86Wrapper
       steamx86Wrapper
       #pkgs.pkgsCross.gnu32.steam
       steamFHS
       mybox64
-      x86.bash #(now this one appears with whereis bash)
+      x86pkgs.bash #(now this one appears with whereis bash)
       muvm
       # additional steam-run tools
       # steam-tui steamcmd steam-unwrapped

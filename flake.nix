@@ -7,6 +7,12 @@
   };
 
   outputs = { self, nixpkgs, flake-utils, ... }@inputs:
+    let
+      x86pkgs = import nixpkgs {
+        system = "x86_64-linux";
+        config.allowUnfree = true;
+      };
+    in
     flake-utils.lib.eachSystem [
       "aarch64-linux"
       "riscv64-linux"
@@ -27,7 +33,9 @@
       }
     ) // {
       nixosModules = {
-        default = import ./default.nix;
+        default = import ./default.nix {
+          inherit inputs x86pkgs;
+        };
       };
       #nixosModules.box64-binfmt = import ./default.nix inputs; 
     };
