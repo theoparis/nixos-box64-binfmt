@@ -8,15 +8,7 @@ in
 
 with lib;
 let 
-  #pkgs.x86 = x86pkgs;
-  # mybox64 = pkgs.callPackage ./mybox64.nix {
-  #   hello-x86_64 = if pkgs.stdenv.hostPlatform.isx86_64 then
-  #     pkgs.hello
-  #   else
-  #     pkgs.pkgsCross.gnu64.hello;
-  # };
-  mybox64 = inputs.self.packages.${system}.mybox64;
-  
+  box64-bleeding-edge = inputs.self.packages.${system}.box64-bleeding-edge;
 
   # Grouped common libraries needed for the FHS environment (64-bit ARM versions)
   steamLibs = with pkgs; [
@@ -575,7 +567,7 @@ let
   steamFHS = pkgs.buildFHSUserEnv {
     name = "steam-fhs";
     targetPkgs = pkgs: (with pkgs; [
-      mybox64 box86 steam-run xdg-utils
+      box64-bleeding-edge box86 steam-run xdg-utils
       vulkan-validation-layers vulkan-headers
       libva-utils swiftshader
     ]) ++ steamLibs;
@@ -628,14 +620,14 @@ box64-fhs-bash = pkgs.writeScriptBin "box64-bashx86-wrapper" ''
   #!${pkgs.bash}/bin/sh
   ${BOX64_VARS}
 
-  exec ${steamFHS}/bin/steam-fhs ${mybox64}/bin/mybox64 ${x86pkgs.bash}/bin/bash "$@"
+  exec ${steamFHS}/bin/steam-fhs ${box64-bleeding-edge}/bin/box64-bleeding-edge ${x86pkgs.bash}/bin/bash "$@"
 '';
 box64-fhs = pkgs.writeScriptBin "box64-wrapper" ''
   #!${pkgs.bash}/bin/sh
 
   ${BOX64_VARS}
 
-  exec ${steamFHS}/bin/steam-fhs ${mybox64}/bin/mybox64 "$@"
+  exec ${steamFHS}/bin/steam-fhs ${box64-bleeding-edge}/bin/box64-bleeding-edge "$@"
 '';
 in {
 
@@ -694,7 +686,7 @@ in {
         #!${pkgs.bash}/bin/sh
         ${BOX64_VARS}
 
-        exec ${steamFHS}/bin/steam-fhs ${mybox64}/bin/mybox64 \
+        exec ${steamFHS}/bin/steam-fhs ${box64-bleeding-edge}/bin/box64-bleeding-edge \
           ${x86pkgs.bash}/bin/bash ${x86pkgs.steam-unwrapped}/lib/steam/bin_steam.sh \
           -no-cef-sandbox \
           -cef-disable-gpu \
@@ -708,7 +700,7 @@ in {
         #!${pkgs.bash}/bin/sh
         ${BOX64_VARS}
 
-        exec ${steamFHS}/bin/steam-fhs ${mybox64}/bin/mybox64 \
+        exec ${steamFHS}/bin/steam-fhs ${box64-bleeding-edge}/bin/box64-bleeding-edge \
           ${x86pkgs.bash}/bin/bash ${x86pkgs.heroic-unwrapped}/bin/heroic
       '';
 
@@ -716,7 +708,7 @@ in {
         #!${pkgs.bash}/bin/sh
         ${BOX64_VARS}
 
-        exec ${steamFHS}/bin/steam-fhs ${mybox64}/bin/mybox64 \
+        exec ${steamFHS}/bin/steam-fhs ${box64-bleeding-edge}/bin/box64-bleeding-edge \
           ${x86pkgs.bash}/bin/bash ${x86pkgs.steamcmd}/bin/steamcmd
       # '';
 
@@ -734,7 +726,7 @@ in {
       steamx86Wrapper
       #pkgs.pkgsCross.gnu32.steam
       steamFHS
-      mybox64
+      box64-bleeding-edge
       x86pkgs.bash #(now this one appears with whereis bash)
       muvm
       # additional steam-run tools
@@ -762,7 +754,7 @@ in {
     # in {
     #   first_box64 =
     #   {
-    #     #interpreter = "${pkgs.mybox64}/bin/mybox64";
+    #     #interpreter = "${pkgs.box64-bleeding-edge}/bin/box64-bleeding-edge";
     #     interpreter = "${box64-fhs}/bin/box64-wrapper";
     #     # x86_64 binaries: magic from nixpkgs “x86_64-linux”
     #     magicOrExtension = ''\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x3e\x00'';
@@ -774,7 +766,7 @@ in {
     #     mask = ''\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff'';
     #   };
     #   # second_box64 = {
-    #   #   #interpreter = "${pkgs.mybox64}/bin/mybox64";
+    #   #   #interpreter = "${pkgs.box64-bleeding-edge}/bin/box64-bleeding-edge";
     #   #   interpreter = "${box64-fhs}/bin/box64-wrapper";
     #   #   # i686 binaries: magic from nixpkgs “i686-linux”
     #   #   magicOrExtension = ''\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x06\x00'';
@@ -783,11 +775,11 @@ in {
     # };
 
   # with this you can run steam-fhs, and the following command:
-  # TEAMOS=1 BOX64_LOG=0 mybox64 /nix/store/x9d49vaqlrkw97p9ichdwrnbh013kq7z-bash-interactive-5.2p37/bin/bash /nix/store/2r90fn1idrk09ghra2zg799pff249hmj-steam-unwrapped-1.0.0.81/lib/steam/bin_steam.sh
+  # TEAMOS=1 BOX64_LOG=0 box64-bleeding-edge /nix/store/x9d49vaqlrkw97p9ichdwrnbh013kq7z-bash-interactive-5.2p37/bin/bash /nix/store/2r90fn1idrk09ghra2zg799pff249hmj-steam-unwrapped-1.0.0.81/lib/steam/bin_steam.sh
 
 /*
 # Using this command to start steam
-/nix/store/x9d49vaqlrkw97p9ichdwrnbh013kq7z-bash-interactive-5.2p37/bin/bash -c "BOX64_LOG=0 mybox64 /nix/store/x9d49vaqlrkw97p9ichdwrnbh013kq7z-bash-interactive-5.2p37/bin/bash /nix/store/2r90fn1idrk09ghra2zg799pff249hmj-steam-unwrapped-1.0.0.81/lib/steam/bin_steam.sh"
+/nix/store/x9d49vaqlrkw97p9ichdwrnbh013kq7z-bash-interactive-5.2p37/bin/bash -c "BOX64_LOG=0 box64-bleeding-edge /nix/store/x9d49vaqlrkw97p9ichdwrnbh013kq7z-bash-interactive-5.2p37/bin/bash /nix/store/2r90fn1idrk09ghra2zg799pff249hmj-steam-unwrapped-1.0.0.81/lib/steam/bin_steam.sh"
 
 You have these bashes rn:
 > file /nix/store/iihnyypprr0ygpdcs5wsawks9mznpd88-bash-interactive-5.2p37/bin/bash                                                                                                 18:15:40

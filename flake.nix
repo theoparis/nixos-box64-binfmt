@@ -25,8 +25,8 @@
     
   in {
     packages = eachSystem (system: {
-      default = self.packages.${system}.mybox64;
-      mybox64 = (pkgsFor system).callPackage ./mybox64.nix {
+      default = self.packages.${system}.box64-bleeding-edge;
+      box64-bleeding-edge = (pkgsFor system).callPackage ./box64-bleeding-edge.nix {
         hello-x86_64 = if (pkgsFor system).stdenv.hostPlatform.isx86_64 then
           (pkgsFor system).hello
         else
