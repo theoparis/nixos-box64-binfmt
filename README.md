@@ -1,4 +1,4 @@
-# box64-binfmt
+# nixos-box64-binfmt
 > [!NOTE]  
 > This is in the most alpha version imaginable
 
