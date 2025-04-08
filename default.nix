@@ -557,7 +557,7 @@ let
 
     # # vulkaninfo should work with CPU now, probably should remove if I MAKE THIS WORK
     # export VK_ICD_FILENAMES=${pkgs.swiftshader}/share/vulkan/icd.d/vk_swiftshader_icd.json; 
-    export VK_ICD_FILENAMES=${pkgs.mesa.drivers}/share/vulkan/icd.d/lvp_icd.aarch64.json; # or radeon_icd.aarch64.json?
+    export VK_ICD_FILENAMES=${pkgs.mesa.drivers}/share/vulkan/icd.d/lvp_icd.aarch64.json; # or radeon_icd.aarch64.json?(no)
 
     #export BOX64_LD_LIBRARY_PATH="${lib.concatMapStringsSep ":" (pkg: "${pkg}/lib") (steamLibs)}:$HOME/.local/share/Steam/ubuntu12_32/steam-runtime/lib/i386-linux-gnu";
     #export LD_LIBRARY_PATH="${lib.concatMapStringsSep ":" (pkg: "${pkg}/lib") (steamLibs)}:$HOME/.local/share/Steam/ubuntu12_32/steam-runtime/lib/i386-linux-gnu";
