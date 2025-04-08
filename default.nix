@@ -20,7 +20,7 @@ let
     xorg.libXcursor xorg.libXi xorg.libXcomposite xorg.libXtst xorg.libSM xorg.libICE libGL libglvnd freetype
     openssl curl zlib dbus-glib ncurses
     
-    libva mesa.drivers
+    libva mesa.drivers mesa
     ncurses5 ncurses6 ncurses
     pkgs.curl.out
     libcef # (https://github.com/ptitSeb/box64/issues/1383)?
@@ -554,7 +554,10 @@ let
     # Set SwiftShader as primary
     export VULKAN_SDK="${pkgs.vulkan-headers}";
     export VK_LAYER_PATH="${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d";
-    export VK_ICD_FILENAMES=${pkgs.swiftshader}/share/vulkan/icd.d/vk_swiftshader_icd.json; # vulkaninfo should work with CPU now, probably should remove if I MAKE THIS WORK
+
+    # # vulkaninfo should work with CPU now, probably should remove if I MAKE THIS WORK
+    # export VK_ICD_FILENAMES=${pkgs.swiftshader}/share/vulkan/icd.d/vk_swiftshader_icd.json; 
+    export VK_ICD_FILENAMES=${pkgs.mesa.drivers}/share/vulkan/icd.d/lvp_icd.aarch64.json; # or radeon_icd.aarch64.json?
 
     #export BOX64_LD_LIBRARY_PATH="${lib.concatMapStringsSep ":" (pkg: "${pkg}/lib") (steamLibs)}:$HOME/.local/share/Steam/ubuntu12_32/steam-runtime/lib/i386-linux-gnu";
     #export LD_LIBRARY_PATH="${lib.concatMapStringsSep ":" (pkg: "${pkg}/lib") (steamLibs)}:$HOME/.local/share/Steam/ubuntu12_32/steam-runtime/lib/i386-linux-gnu";
