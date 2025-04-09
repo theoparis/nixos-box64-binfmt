@@ -403,17 +403,6 @@ let
     # libcef (https://github.com/ptitSeb/box64/issues/1383) error: unsupported system i686-linux
   ];
 
-# still missing libs:
-# cat tests.txt | grep "Error loading"                                                                                                                                             15:28:19
-# Error loading needed lib libGLX.so
-# Error loading needed lib libxapp-gtk3-module.so
-# Error loading needed lib libvulkan.so.1
-# Error loading needed lib libvulkan.so
-# Error loading needed lib libunity.so.9
-# Error loading needed lib libvulkan.so.1
-# Error loading needed lib libvulkan.so
-
-
   # Get 32-bit counterparts using armv7l cross-compilation
   steamLibsAarch32 = let
     crossPkgs = pkgs.pkgsCross.armv7l-hf-multiplatform;
@@ -489,47 +478,47 @@ let
   # in map (x: x.value) (filter (x: x.success) (map getCrossLib steamLibs));
 
 
-  steamLibsMineX86_64 = let
-    crossPkgs = x86pkgs;
-    getCrossLib = lib:
-      let
-        # Map problematic package names to their cross-compilation equivalents
-        crossName = 
-          if lib.pname or null == "xapp-gtk3" then "xapp-gtk3-module"
-          else if lib.pname or null == "unity" then "libunity"
-          else if lib.pname or null == "gtk+-2.24.33" then "gtk2"
-          else if lib.pname or null == "openal-soft" then "openalSoft"
-          else if lib.pname or null == "systemd-minimal-libs" then "systemd"
-          else if lib.pname or null == "ibus-engines.libpinyin" then "ibus-engines"
-          else if lib ? pname then lib.pname
-          else lib.name;
+  # steamLibsMineX86_64 = let
+  #   crossPkgs = x86pkgs;
+  #   getCrossLib = lib:
+  #     let
+  #       # Map problematic package names to their cross-compilation equivalents
+  #       crossName = 
+  #         if lib.pname or null == "xapp-gtk3" then "xapp-gtk3-module"
+  #         else if lib.pname or null == "unity" then "libunity"
+  #         else if lib.pname or null == "gtk+-2.24.33" then "gtk2"
+  #         else if lib.pname or null == "openal-soft" then "openalSoft"
+  #         else if lib.pname or null == "systemd-minimal-libs" then "systemd"
+  #         else if lib.pname or null == "ibus-engines.libpinyin" then "ibus-engines"
+  #         else if lib ? pname then lib.pname
+  #         else lib.name;
         
-        # Handle special cases where attributes need different access
-        finalPkg = crossPkgs.${crossName} or (throw "Missing cross package: ${crossName}");
-      in
-      builtins.tryEval finalPkg;
-  in map (x: x.value) (filter (x: x.success) (map getCrossLib steamLibs));
+  #       # Handle special cases where attributes need different access
+  #       finalPkg = crossPkgs.${crossName} or (throw "Missing cross package: ${crossName}");
+  #     in
+  #     builtins.tryEval finalPkg;
+  # in map (x: x.value) (filter (x: x.success) (map getCrossLib steamLibs));
 
-  steamLibsMinei686 = let
-    crossPkgs = pkgs.i686;
-    getCrossLib = lib:
-      let
-        # Map problematic package names to their cross-compilation equivalents
-        crossName = 
-          if lib.pname or null == "xapp-gtk3" then "xapp-gtk3-module"
-          else if lib.pname or null == "unity" then "libunity"
-          else if lib.pname or null == "gtk+-2.24.33" then "gtk2"
-          else if lib.pname or null == "openal-soft" then "openalSoft"
-          else if lib.pname or null == "systemd-minimal-libs" then "systemd"
-          else if lib.pname or null == "ibus-engines.libpinyin" then "ibus-engines"
-          else if lib ? pname then lib.pname
-          else lib.name;
+  # steamLibsMinei686 = let
+  #   crossPkgs = pkgs.i686;
+  #   getCrossLib = lib:
+  #     let
+  #       # Map problematic package names to their cross-compilation equivalents
+  #       crossName = 
+  #         if lib.pname or null == "xapp-gtk3" then "xapp-gtk3-module"
+  #         else if lib.pname or null == "unity" then "libunity"
+  #         else if lib.pname or null == "gtk+-2.24.33" then "gtk2"
+  #         else if lib.pname or null == "openal-soft" then "openalSoft"
+  #         else if lib.pname or null == "systemd-minimal-libs" then "systemd"
+  #         else if lib.pname or null == "ibus-engines.libpinyin" then "ibus-engines"
+  #         else if lib ? pname then lib.pname
+  #         else lib.name;
         
-        # Handle special cases where attributes need different access
-        finalPkg = crossPkgs.${crossName} or (throw "Missing cross package: ${crossName}");
-      in
-      builtins.tryEval finalPkg;
-  in map (x: x.value) (filter (x: x.success) (map getCrossLib steamLibs));
+  #       # Handle special cases where attributes need different access
+  #       finalPkg = crossPkgs.${crossName} or (throw "Missing cross package: ${crossName}");
+  #     in
+  #     builtins.tryEval finalPkg;
+  # in map (x: x.value) (filter (x: x.success) (map getCrossLib steamLibs));
 
   box64Source = pkgs.fetchFromGitHub {
     owner = "ptitSeb";
@@ -612,32 +601,29 @@ let
 
     # makes folders /usr/lib/box64-i386-linux-gnu and /usr/lib/box64-x86_64-linux-gnu (/usr/lib is an alias to /lib64 in the FHS)
     extraBuildCommands = ''
+      mkdir -p $out/usr/lib64/box64-x86_64-linux-gnu
+      cp -r ${box64Source}/x64lib/* $out/usr/lib64/box64-x86_64-linux-gnu/
 
+      mkdir -p $out/usr/lib64/box64-i386-linux-gnu
+      cp -r ${box64Source}/x86lib/* $out/usr/lib64/box64-i386-linux-gnu/
     '';
 
     runScript = ''
       # Enable box64/box86 logging if needed
       ${BOX64_VARS}
 
-      if [ "$#" -eq 0 ]; then
-        exec ${pkgs.bashInteractive}/bin/bash
-      else
-        #exec ${pkgs.bashInteractive}/bin/bash -c "$@"
-        exec "$@"
+      if [ $# -eq 0 ]; then
+        echo "Usage: steam-run command-to-run args..." >&2
+        exit 1
       fi
+
+      exec "$@"
     '';
   };
 
 
 in 
 let 
-# TODO should be same as box64-fhs, just make a check to see if it's a bash script
-box64-fhs-bash = pkgs.writeScriptBin "box64-bashx86-wrapper" '' 
-  #!${pkgs.bash}/bin/sh
-  ${BOX64_VARS}
-
-  exec ${steamFHS}/bin/steam-fhs ${box64-bleeding-edge}/bin/box64-bleeding-edge ${x86pkgs.bash}/bin/bash "$@"
-'';
 box64-fhs = pkgs.writeScriptBin "box64-wrapper" ''
   #!${pkgs.bash}/bin/sh
 
@@ -707,18 +693,9 @@ in {
           ${x86pkgs.bash}/bin/bash ${x86pkgs.heroic-unwrapped}/bin/heroic
       '';
 
-      steamcmdx86Wrapper = pkgs.writeScriptBin "box64-bashx86-steamcmdx86-wrapper" ''
-        #!${pkgs.bash}/bin/sh
-        ${BOX64_VARS}
-
-        exec ${steamFHS}/bin/steam-fhs ${box64-bleeding-edge}/bin/box64-bleeding-edge \
-          ${x86pkgs.bash}/bin/bash ${x86pkgs.steamcmd}/bin/steamcmd
-      # '';
-
     in [
       # steam-related packages
       box64-fhs
-      box64-fhs-bash
       unstable.fex # idfk man
       #steamx86
       x86pkgs.steam-unwrapped
@@ -729,7 +706,7 @@ in {
       steamx86Wrapper
       #pkgs.pkgsCross.gnu32.steam
       steamFHS
-      box64-bleeding-edge
+      # box64-bleeding-edge
       x86pkgs.bash #(now this one appears with whereis bash)
       muvm
       # additional steam-run tools
@@ -750,78 +727,5 @@ in {
       };
     };
 
-
-    # boot.binfmt.registrations = # https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/system/boot/binfmt.nix
-    # let 
-
-    # in {
-    #   first_box64 =
-    #   {
-    #     #interpreter = "${pkgs.box64-bleeding-edge}/bin/box64-bleeding-edge";
-    #     interpreter = "${box64-fhs}/bin/box64-wrapper";
-    #     # x86_64 binaries: magic from nixpkgs “x86_64-linux”
-    #     magicOrExtension = ''\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x3e\x00'';
-    #     mask = ''\xff\xff\xff\xff\xff\xfe\xfe\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff'';
-    #   };
-    #   i686 = {
-    #     interpreter = "${box64-fhs}/bin/box64-wrapper";
-    #     magicOrExtension = ''\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x03\x00'';
-    #     mask = ''\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff'';
-    #   };
-    #   # second_box64 = {
-    #   #   #interpreter = "${pkgs.box64-bleeding-edge}/bin/box64-bleeding-edge";
-    #   #   interpreter = "${box64-fhs}/bin/box64-wrapper";
-    #   #   # i686 binaries: magic from nixpkgs “i686-linux”
-    #   #   magicOrExtension = ''\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x06\x00'';
-    #   #   mask = ''\xff\xff\xff\xff\xff\xfe\xfe\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff'';
-    #   # };
-    # };
-
-  # with this you can run steam-fhs, and the following command:
-  # TEAMOS=1 BOX64_LOG=0 box64-bleeding-edge /nix/store/x9d49vaqlrkw97p9ichdwrnbh013kq7z-bash-interactive-5.2p37/bin/bash /nix/store/2r90fn1idrk09ghra2zg799pff249hmj-steam-unwrapped-1.0.0.81/lib/steam/bin_steam.sh
-
-/*
-# Using this command to start steam
-/nix/store/x9d49vaqlrkw97p9ichdwrnbh013kq7z-bash-interactive-5.2p37/bin/bash -c "BOX64_LOG=0 box64-bleeding-edge /nix/store/x9d49vaqlrkw97p9ichdwrnbh013kq7z-bash-interactive-5.2p37/bin/bash /nix/store/2r90fn1idrk09ghra2zg799pff249hmj-steam-unwrapped-1.0.0.81/lib/steam/bin_steam.sh"
-
-You have these bashes rn:
-> file /nix/store/iihnyypprr0ygpdcs5wsawks9mznpd88-bash-interactive-5.2p37/bin/bash                                                                                                 18:15:40
-/nix/store/iihnyypprr0ygpdcs5wsawks9mznpd88-bash-interactive-5.2p37/bin/bash: ELF 64-bit LSB executable, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /nix/store/8d9rkvllf04pyz790vk6wd4k8mnc5c64-glibc-2.40-36/lib/ld-linux-aarch64.so.1, BuildID[sha1]=5c9d8b11851246b7766f0a7b3042a8988faad435, for GNU/Linux 3.10.0, not stripped
-
-> file /nix/store/x9d49vaqlrkw97p9ichdwrnbh013kq7z-bash-interactive-5.2p37/bin/bash                                                                                                 18:15:46
-/nix/store/x9d49vaqlrkw97p9ichdwrnbh013kq7z-bash-interactive-5.2p37/bin/bash: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /nix/store/nqb2ns2d1lahnd5ncwmn6k84qfd7vx2k-glibc-2.40-36/lib/ld-linux-x86-64.so.2, BuildID[sha1]=34fa0f38a1693296290bec33a571faae527b8535, for GNU/Linux 3.10.0, not stripped
-
-
-And try and run steam with:
-> /nix/store/x9d49vaqlrkw97p9ichdwrnbh013kq7z-bash-interactive-5.2p37/bin/bash -c "box64 /nix/store/2r90fn1idrk09ghra2zg799pff249hmj-steam-unwrapped-1.0.0.81/lib/steam/bin_steam.sh"
- */
-
-
-    # Export libraries to current path:
-    /*
-export LD_LIBRARY_PATH="$(for lib in \                                                                                                                                                            01:39:42
-  glibc glib.out gtk2 gdk-pixbuf pango.out cairo.out \
-  fontconfig libdrm libvdpau expat util-linux \
-  at-spi2-core libnotify gnutls openalSoft udev \
-  xorg.libXinerama xorg.libXdamage xorg.libXScrnSaver \
-  xorg.libxcb libva gcc-unwrapped.lib libgccjit \
-  libpng libpulseaudio libjpeg libvorbis stdenv.cc.cc.lib \
-  xorg.libX11 xorg.libXext xorg.libXrandr xorg.libXrender \
-  xorg.libXfixes xorg.libXcursor xorg.libXi xorg.libXcomposite \
-  xorg.libXtst xorg.libSM xorg.libICE libGL libglvnd \
-  vulkan-loader freetype openssl curl zlib dbus ncurses SDL2 \
-  ; do nix-build '<nixpkgs>' -A ${lib} --no-out-link; done \
-  | xargs -I {} echo -n {}/lib: | sed 's/:$//')\
-:$HOME/.local/share/Steam/ubuntu12_32/steam-runtime/lib/i386-linux-gnu\
-:$HOME/.local/share/Steam/ubuntu12_32/steam-runtime/usr/lib/i386-linux-gnu\
-:$HOME/.local/share/Steam/ubuntu12_32/steam-runtime/lib\
-:$HOME/.local/share/Steam/ubuntu12_32/steam-runtime/usr/lib"
-
-  # echo $LD_LIBRARY_PATH
-
-
-
-  binfmt definition ni nixpkgs: https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/system/boot/binfmt.nix
-     */
   };
 }
