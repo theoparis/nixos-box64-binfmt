@@ -531,6 +531,12 @@ let
       builtins.tryEval finalPkg;
   in map (x: x.value) (filter (x: x.success) (map getCrossLib steamLibs));
 
+  box64Source = pkgs.fetchFromGitHub {
+    owner = "ptitSeb";
+    repo = "box64";
+    rev = "main";
+    sha256 = "sha256-v0vAAvNiQsvzQUu3Yy5ZzCwyC1kP+RwQXi27buHCu9w=";
+  };
 in
 
 let
@@ -584,6 +590,11 @@ let
       # ++ steamLibsMinei686
       ;
 
+    #multiArch = pkgs: 
+      #steamLibs 
+      #odbcinst
+      #;
+
     # to know where to put the x86_64 and i368 libs:
     # I saw this comment online: (https://github.com/ptitSeb/box64/issues/476#issuecomment-2667068838)
     # ```
@@ -599,7 +610,13 @@ let
     # > You can use `BOX86_LOG=1` for more details on missing libs when launching steam. Also, notes that gtk libs will be emulated when running steam (by design), and so will appear as missing. It's not conveniant because it makes understanding the missing what lib is missing more difficult, as some missing lib are ok, and some are not. Start by installing harfbuzz, and run with log=1 and paste the log here if it still doesn't work.
     # ```
 
-    extraInstallCommands = ''
+    # makes folders /usr/lib/box64-i386-linux-gnu and /usr/lib/box64-x86_64-linux-gnu (/usr/lib is an alias to /lib64 in the FHS)
+    extraBuildCommands = ''
+      mkdir -p $out/usr/lib64/box64-x86_64-linux-gnu
+      cp -r ${box64Source}/x64lib/* $out/usr/lib64/box64-x86_64-linux-gnu/
+
+      mkdir -p $out/usr/lib64/box64-i386-linux-gnu
+      cp -r ${box64Source}/x86lib/* $out/usr/lib64/box64-i386-linux-gnu/
     '';
 
     runScript = ''
@@ -609,7 +626,8 @@ let
       if [ "$#" -eq 0 ]; then
         exec ${pkgs.bashInteractive}/bin/bash
       else
-        exec ${pkgs.bashInteractive}/bin/bash -c "$@"
+        #exec ${pkgs.bashInteractive}/bin/bash -c "$@"
+        exec "$@"
       fi
     '';
   };
