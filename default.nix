@@ -612,11 +612,7 @@ let
 
     # makes folders /usr/lib/box64-i386-linux-gnu and /usr/lib/box64-x86_64-linux-gnu (/usr/lib is an alias to /lib64 in the FHS)
     extraBuildCommands = ''
-      mkdir -p $out/usr/lib64/box64-x86_64-linux-gnu
-      cp -r ${box64Source}/x64lib/* $out/usr/lib64/box64-x86_64-linux-gnu/
 
-      mkdir -p $out/usr/lib64/box64-i386-linux-gnu
-      cp -r ${box64Source}/x86lib/* $out/usr/lib64/box64-i386-linux-gnu/
     '';
 
     runScript = ''
