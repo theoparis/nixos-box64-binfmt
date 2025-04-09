@@ -609,8 +609,7 @@ let
       if [ "$#" -eq 0 ]; then
         exec ${pkgs.bashInteractive}/bin/bash
       else
-        exec "$@"
-        
+        exec ${pkgs.bashInteractive}/bin/bash -c "$@"
       fi
     '';
   };
