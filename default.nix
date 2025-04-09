@@ -404,25 +404,25 @@ let
   ];
 
   # Get 32-bit counterparts using armv7l cross-compilation
-  steamLibsAarch32 = let
-    crossPkgs = pkgs.pkgsCross.armv7l-hf-multiplatform;
-    getCrossLib = lib:
-      let
-        # Map problematic package names to their cross-compilation equivalents
-        crossName = 
-          if lib.pname or null == "gtk+" then "gtk2"
-          else if lib.pname or null == "openal-soft" then "openalSoft"
-          else if lib.pname or null == "systemd-minimal-libs" then "systemd"
-          else if lib.pname or null == "ibus-engines.libpinyin" then "ibus-engines"
-          else if lib ? pname then lib.pname
-          else lib.name;
+  # steamLibsAarch32 = let
+  #   crossPkgs = pkgs.pkgsCross.armv7l-hf-multiplatform;
+  #   getCrossLib = lib:
+  #     let
+  #       # Map problematic package names to their cross-compilation equivalents
+  #       crossName = 
+  #         if lib.pname or null == "gtk+" then "gtk2"
+  #         else if lib.pname or null == "openal-soft" then "openalSoft"
+  #         else if lib.pname or null == "systemd-minimal-libs" then "systemd"
+  #         else if lib.pname or null == "ibus-engines.libpinyin" then "ibus-engines"
+  #         else if lib ? pname then lib.pname
+  #         else lib.name;
         
-        # Handle special cases where attributes need different access
-        finalPkg = crossPkgs.${crossName} or (throw "Missing cross package: ${crossName}");
-      in
-      builtins.tryEval finalPkg;
-  in
-    map (x: x.value) (filter (x: x.success) (map getCrossLib steamLibs));
+  #       # Handle special cases where attributes need different access
+  #       finalPkg = crossPkgs.${crossName} or (throw "Missing cross package: ${crossName}");
+  #     in
+  #     builtins.tryEval finalPkg;
+  # in
+  #   map (x: x.value) (filter (x: x.success) (map getCrossLib steamLibs));
 
   # steamLibsX86_64 = let
   #   crossPkgs = pkgs.pkgsCross.gnu64;
@@ -645,17 +645,9 @@ in {
           config.allowUnfree = true;
         };
       in {
-        inherit (x86pkgs) steam-run;
-        # steam steam-run
-        #steam steam-run;
-        #bashx86 = x86pkgs.bashInteractive;
-        #steamx86 = x86pkgs.steam-unwrapped;
+        inherit (x86pkgs) steam-run steam-unwrapped;
       })
     ];
-
-    # Add these env variables to /home/yeshey/.local/share/Steam/steam.sh to get more logs when it downloaads the stuffs
-    #export STEAM_DEBUG=1  # Enables set -x in steam.sh
-    #export STEAM_LOG=1    # Additional Steam logging
 
     # you made this comment in nixos discourse: https://discourse.nixos.org/t/how-to-install-steam-x86-64-on-a-pinephone-aarch64/19297/7?u=yeshey
     
@@ -698,7 +690,7 @@ in {
       x86pkgs.steam-unwrapped
       x86pkgs.heroic-unwrapped
       # steamcmdx86Wrapper
-      x86pkgs.steamcmd
+      # x86pkgs.steamcmd
       heroicx86Wrapper
       steamx86Wrapper
       #pkgs.pkgsCross.gnu32.steam
