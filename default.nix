@@ -545,6 +545,7 @@ let
     export SDL_VIDEODRIVER=x11;  # wayland
     export BOX64_TRACE_FILE="stderr"; # apparantly prevents steam sniper not found error https://github.com/Botspot/pi-apps/issues/2614#issuecomment-2209629910
     export BOX86_TRACE_FILE=stderr;
+    export BOX64_AVX=1;
 
     # Set SwiftShader as primary
     export VULKAN_SDK="${pkgs.vulkan-headers}";
@@ -556,9 +557,6 @@ let
 
     #export BOX64_LD_LIBRARY_PATH="${lib.concatMapStringsSep ":" (pkg: "${pkg}/lib") (steamLibs)}:$HOME/.local/share/Steam/ubuntu12_32/steam-runtime/lib/i386-linux-gnu";
     #export LD_LIBRARY_PATH="${lib.concatMapStringsSep ":" (pkg: "${pkg}/lib") (steamLibs)}:$HOME/.local/share/Steam/ubuntu12_32/steam-runtime/lib/i386-linux-gnu";
-
-    export DBUS_FATAL_WARNINGS=0;
-    BOX64_AVX=0;
   '';
 
   # FHS environment that spawns a bash shell by default, or runs a given command if arguments are provided
@@ -612,12 +610,11 @@ let
       # Enable box64/box86 logging if needed
       ${BOX64_VARS}
 
-      if [ $# -eq 0 ]; then
-        echo "Usage: steam-run command-to-run args..." >&2
-        exit 1
+      if [ "$#" -eq 0 ]; then
+        exec ${pkgs.bashInteractive}/bin/bash
+      else
+        exec "$@"
       fi
-
-      exec "$@"
     '';
   };
 
