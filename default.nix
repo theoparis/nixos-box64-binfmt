@@ -607,7 +607,7 @@ let
     '';
 
     runScript = ''
-      # Enable box64/box86 logging if needed
+      # Enable box64 logging if needed
       ${BOX64_VARS}
 
       if [ "$#" -eq 0 ]; then
