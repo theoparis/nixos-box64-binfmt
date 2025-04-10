@@ -652,7 +652,7 @@ in {
     # you made this comment in nixos discourse: https://discourse.nixos.org/t/how-to-install-steam-x86-64-on-a-pinephone-aarch64/19297/7?u=yeshey
     
     # Uncomment these lines if you need to set extra platforms for binfmt:
-    # boot.binfmt.emulatedSystems = ["i686-linux" "x86_64-linux"];
+    boot.binfmt.emulatedSystems = ["i686-linux" "x86_64-linux"];
     # nix.settings.extra-platforms = config.boot.binfmt.emulatedSystems;
     nix.settings.extra-platforms = ["i686-linux" "x86_64-linux"];
     nixpkgs.config.allowUnsupportedSystem = true;
@@ -702,19 +702,19 @@ in {
       # steam-tui steamcmd steam-unwrapped
     ];
 
-    boot.binfmt.registrations = {
-      i386-linux = {
-        interpreter = "${box64-fhs}/bin/box64-wrapper";
-        magicOrExtension = ''\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x03\x00'';
-        mask             = ''\xff\xff\xff\xff\xff\xfe\xfe\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff'';
-      };
+    # boot.binfmt.registrations = {
+    #   i386-linux = {
+    #     interpreter = "${box64-fhs}/bin/box64-wrapper";
+    #     magicOrExtension = ''\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x03\x00'';
+    #     mask             = ''\xff\xff\xff\xff\xff\xfe\xfe\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff'';
+    #   };
 
-      x86_64-linux = {
-        interpreter = "${box64-fhs}/bin/box64-wrapper";
-        magicOrExtension = ''\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x3e\x00'';
-        mask             = ''\xff\xff\xff\xff\xff\xfe\xfe\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff'';
-      };
-    };
+    #   x86_64-linux = {
+    #     interpreter = "${box64-fhs}/bin/box64-wrapper";
+    #     magicOrExtension = ''\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x3e\x00'';
+    #     mask             = ''\xff\xff\xff\xff\xff\xfe\xfe\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff'';
+    #   };
+    # };
 
   };
 }
