@@ -260,6 +260,10 @@ let
     # libcef (https://github.com/ptitSeb/box64/issues/1383) error: unsupported system i686-linux
   ];
 
+  steamLibsX86_64_GL = with pkgs.pkgsCross.gnu64; [
+    libGL
+  ];
+
   steamLibsX86_64 = with pkgs.pkgsCross.gnu64; [
     unityhub
     glibc
@@ -547,6 +551,9 @@ let
     export BOX86_TRACE_FILE=stderr;
     export BOX64_AVX=1;
 
+    # https://github.com/NixOS/nixpkgs/issues/221056#issuecomment-2454222836
+    # echo "qemu-${pkgs.qemu-user.version}-user-${system} cp ${pkgs.pkgsStatic.qemu-user}/bin/qemu-${(lib.systems.elaborate { inherit system; }).qemuArch} $out; }"
+
     # Set SwiftShader as primary
     export VULKAN_SDK="${pkgs.vulkan-headers}";
     export VK_LAYER_PATH="${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d";
@@ -600,10 +607,10 @@ let
     # makes folders /usr/lib/box64-i386-linux-gnu and /usr/lib/box64-x86_64-linux-gnu (/usr/lib is an alias to /lib64 in the FHS)
     extraBuildCommands = ''
       mkdir -p $out/usr/lib64/box64-x86_64-linux-gnu
-      cp -r ${box64Source}/x64lib/* $out/usr/lib64/box64-x86_64-linux-gnu/
+      #cp -r ${box64Source}/x64lib/* $out/usr/lib64/box64-x86_64-linux-gnu/
 
       mkdir -p $out/usr/lib64/box64-i386-linux-gnu
-      cp -r ${box64Source}/x86lib/* $out/usr/lib64/box64-i386-linux-gnu/
+      #cp -r ${box64Source}/x86lib/* $out/usr/lib64/box64-i386-linux-gnu/
     '';
 
     runScript = ''
@@ -637,6 +644,13 @@ in {
 
   config = mkIf cfg.enable {
 
+    # environment.sessionVariables = {
+    #   LD_LIBRARY_PATH = [
+    #     "${pkgs.pkgsCross.gnu32.mesa}/lib"  # x86 Mesa libraries
+    #     "${pkgs.pkgsCross.gnu32.libglvnd}/lib"
+    #   ];
+    # };
+
     # Needed to allow installing x86 packages, otherwise: error: i686 Linux package set can only be used with the x86 family
     nixpkgs.overlays = [
       (self: super: let
@@ -653,6 +667,17 @@ in {
     
     # Uncomment these lines if you need to set extra platforms for binfmt:
     boot.binfmt.emulatedSystems = ["i686-linux" "x86_64-linux"];
+    # boot.binfmt.preferStaticEmulators = true; # segmentation faults everywhere! Maybe should open an issue?
+    # qemu-x86_64 /nix/store/ar34slssgxb42jc2kzlra86ra9cz1s7f-system-path/bin/bash /nix/store/ar34slssgxb42jc2kzlra86ra9cz1s7f-system-path/bin/katawa-shoujo
+
+    # qemu-x86_64 /nix/store/ar34slssgxb42jc2kzlra86ra9cz1s7f-system-path/bin/bash /nix/store/ar34slssgxb42jc2kzlra86ra9cz1s7f-system-path/bin/katawa-shoujo
+
+    # > ls /nix/store/iibp3zwxycxkr9v9dgcs8g9jpflfbcni-qemu-user-static-aarch64-unknown-linux-musl-9.1.2/bin/                                                                                00:23:31
+    # qemu-aarch64     qemu-arm    qemu-hexagon  qemu-loongarch64  qemu-microblazeel  qemu-mips64el  qemu-mipsn32el  qemu-ppc64    qemu-riscv64  qemu-sh4eb        qemu-sparc64  qemu-xtensaeb
+    # qemu-aarch64_be  qemu-armeb  qemu-hppa     qemu-m68k         qemu-mips          qemu-mipsel    qemu-or1k       qemu-ppc64le  qemu-s390x    qemu-sparc        qemu-x86_64
+    # qemu-alpha       qemu-cris   qemu-i386     qemu-microblaze   qemu-mips64        qemu-mipsn32   qemu-ppc        qemu-riscv32  qemu-sh4      qemu-sparc32plus  qemu-xtensa
+
+
     # nix.settings.extra-platforms = config.boot.binfmt.emulatedSystems;
     nix.settings.extra-platforms = ["i686-linux" "x86_64-linux"];
     nixpkgs.config.allowUnsupportedSystem = true;
@@ -682,8 +707,15 @@ in {
           ${x86pkgs.bash}/bin/bash ${x86pkgs.heroic-unwrapped}/bin/heroic
       '';
 
+      # export LD_LIBRARY_PATH="${lib.makeLibraryPath steamLibsX86_64}:$LD_LIBRARY_PATH"
+      glmark2-x86 = pkgs.writeShellScriptBin "glmark2-x86" ''
+        export LD_LIBRARY_PATH="${lib.makeLibraryPath steamLibsX86_64_GL}:$LD_LIBRARY_PATH"
+        exec /nix/store/g741bnhdizvkpqfpqnmbz4dirai1ja7s-glmark2-2023.01/bin/.glmark2-wrapped "$@"
+      '';
+
     in [
       # steam-related packages
+      glmark2-x86
       box64-fhs
       unstable.fex # idfk man
       #steamx86
