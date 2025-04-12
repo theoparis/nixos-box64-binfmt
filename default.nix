@@ -562,8 +562,8 @@ let
     # export VK_ICD_FILENAMES=${pkgs.swiftshader}/share/vulkan/icd.d/vk_swiftshader_icd.json; 
     export VK_ICD_FILENAMES=${pkgs.mesa.drivers}/share/vulkan/icd.d/lvp_icd.aarch64.json; # or radeon_icd.aarch64.json?(no)
 
-    #export BOX64_LD_LIBRARY_PATH="${lib.concatMapStringsSep ":" (pkg: "${pkg}/lib") (steamLibs)}:$HOME/.local/share/Steam/ubuntu12_32/steam-runtime/lib/i386-linux-gnu";
-    #export LD_LIBRARY_PATH="${lib.concatMapStringsSep ":" (pkg: "${pkg}/lib") (steamLibs)}:$HOME/.local/share/Steam/ubuntu12_32/steam-runtime/lib/i386-linux-gnu";
+    export BOX64_LD_LIBRARY_PATH="${lib.concatMapStringsSep ":" (pkg: "${pkg}/lib") (steamLibs)}:$HOME/.local/share/Steam/ubuntu12_32/steam-runtime/lib/i386-linux-gnu";
+    export LD_LIBRARY_PATH="${lib.concatMapStringsSep ":" (pkg: "${pkg}/lib") (steamLibs)}:$HOME/.local/share/Steam/ubuntu12_32/steam-runtime/lib/i386-linux-gnu";
   '';
 
   # FHS environment that spawns a bash shell by default, or runs a given command if arguments are provided
@@ -666,7 +666,7 @@ in {
     # you made this comment in nixos discourse: https://discourse.nixos.org/t/how-to-install-steam-x86-64-on-a-pinephone-aarch64/19297/7?u=yeshey
     
     # Uncomment these lines if you need to set extra platforms for binfmt:
-    boot.binfmt.emulatedSystems = ["i686-linux" "x86_64-linux"];
+    # boot.binfmt.emulatedSystems = ["i686-linux" "x86_64-linux"];
     # boot.binfmt.preferStaticEmulators = true; # segmentation faults everywhere! Maybe should open an issue?
     # qemu-x86_64 /nix/store/ar34slssgxb42jc2kzlra86ra9cz1s7f-system-path/bin/bash /nix/store/ar34slssgxb42jc2kzlra86ra9cz1s7f-system-path/bin/katawa-shoujo
 
@@ -710,7 +710,7 @@ in {
       # export LD_LIBRARY_PATH="${lib.makeLibraryPath steamLibsX86_64}:$LD_LIBRARY_PATH"
       glmark2-x86 = pkgs.writeShellScriptBin "glmark2-x86" ''
         export LD_LIBRARY_PATH="${lib.makeLibraryPath steamLibsX86_64_GL}:$LD_LIBRARY_PATH"
-        exec /nix/store/g741bnhdizvkpqfpqnmbz4dirai1ja7s-glmark2-2023.01/bin/.glmark2-wrapped "$@"
+        exec /nix/store/g741bnhdizvkpqfpqnmbz4dirai1ja7s-glmark2-2023.01/bin/.glmark2-wrapped -b :show-fps=true:title=#info#
       '';
 
     in [
@@ -734,19 +734,19 @@ in {
       # steam-tui steamcmd steam-unwrapped
     ];
 
-    # boot.binfmt.registrations = {
-    #   i386-linux = {
-    #     interpreter = "${box64-fhs}/bin/box64-wrapper";
-    #     magicOrExtension = ''\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x03\x00'';
-    #     mask             = ''\xff\xff\xff\xff\xff\xfe\xfe\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff'';
-    #   };
+    boot.binfmt.registrations = {
+      i386-linux = {
+        interpreter = "${box64-fhs}/bin/box64-wrapper";
+        magicOrExtension = ''\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x03\x00'';
+        mask             = ''\xff\xff\xff\xff\xff\xfe\xfe\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff'';
+      };
 
-    #   x86_64-linux = {
-    #     interpreter = "${box64-fhs}/bin/box64-wrapper";
-    #     magicOrExtension = ''\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x3e\x00'';
-    #     mask             = ''\xff\xff\xff\xff\xff\xfe\xfe\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff'';
-    #   };
-    # };
+      x86_64-linux = {
+        interpreter = "${box64-fhs}/bin/box64-wrapper";
+        magicOrExtension = ''\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x3e\x00'';
+        mask             = ''\xff\xff\xff\xff\xff\xfe\xfe\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff'';
+      };
+    };
 
   };
 }
