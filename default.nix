@@ -681,7 +681,10 @@ in {
     # you made this comment in nixos discourse: https://discourse.nixos.org/t/how-to-install-steam-x86-64-on-a-pinephone-aarch64/19297/7?u=yeshey
     
     # Uncomment these lines if you need to set extra platforms for binfmt:
+    # you can use qemu-x86_64 /nix/store/ar34slssgxb42jc2kzlra86ra9cz1s7f-system-path/bin/bash, to get in a shell
     boot.binfmt.emulatedSystems = ["i686-linux" "x86_64-linux"];
+    #security.wrappers.bwrap.setuid = lib.mkForce false;
+    # security.unprivilegedUsernsClone = true;  # Still required for bwrap
     # boot.binfmt.preferStaticEmulators = true; # segmentation faults everywhere! Maybe should open an issue?
     # qemu-x86_64 /nix/store/ar34slssgxb42jc2kzlra86ra9cz1s7f-system-path/bin/bash /nix/store/ar34slssgxb42jc2kzlra86ra9cz1s7f-system-path/bin/katawa-shoujo
 
