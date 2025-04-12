@@ -605,12 +605,28 @@ let
     # ```
 
     # makes folders /usr/lib/box64-i386-linux-gnu and /usr/lib/box64-x86_64-linux-gnu (/usr/lib is an alias to /lib64 in the FHS)
-    extraBuildCommands = ''
+    extraBuildCommands = let
+        # Get all store paths of the steamLibsX86_64 packages
+        steamLibPaths = (builtins.map (pkg: "${pkg}") steamLibsX86_64);
+      in ''
       mkdir -p $out/usr/lib64/box64-x86_64-linux-gnu
-      #cp -r ${box64Source}/x64lib/* $out/usr/lib64/box64-x86_64-linux-gnu/
+      cp -r ${box64Source}/x64lib/* $out/usr/lib64/box64-x86_64-linux-gnu/
 
       mkdir -p $out/usr/lib64/box64-i386-linux-gnu
-      #cp -r ${box64Source}/x86lib/* $out/usr/lib64/box64-i386-linux-gnu/
+      cp -r ${box64Source}/x86lib/* $out/usr/lib64/box64-i386-linux-gnu/
+
+      # Symlink Steam libraries into Box64 x86_64 directory
+      ${lib.concatMapStringsSep "\n" (pkgPath: ''
+        # Symlink libraries from lib directory
+        if [ -d "${pkgPath}/lib" ]; then
+          find "${pkgPath}/lib" -maxdepth 1 -name '*.so*' -exec ln -svf -t $out/usr/lib64/box64-x86_64-linux-gnu {} \+
+        fi
+        
+        # Symlink libraries from lib64 directory
+        if [ -d "${pkgPath}/lib64" ]; then
+          find "${pkgPath}/lib64" -maxdepth 1 -name '*.so*' -exec ln -svf -t $out/usr/lib64/box64-x86_64-linux-gnu {} \+
+        fi
+      '') steamLibPaths}
     '';
 
     runScript = ''
