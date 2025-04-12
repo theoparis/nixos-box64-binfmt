@@ -3,11 +3,10 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    nixpkgsx86.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, nixpkgsx86, ... }@inputs: let
+  outputs = { self, nixpkgs, ... }@inputs: let
     lib = nixpkgs.lib;
     supportedSystems = [ "aarch64-linux" "riscv64-linux" ];
     eachSystem = f: lib.genAttrs supportedSystems (system: f system);
@@ -18,14 +17,8 @@
       config.allowUnfree = true;
     };
     
-    # Special x86 package set (not in supportedSystems)
-    x86pkgs = import nixpkgs {
-      system = "x86_64-linux";
-      config.allowUnfree = true;
-    };
-    
     overlay = final: prev: {
-      x86 = import nixpkgsx86 {
+      x86 = import nixpkgs {
         system = "x86_64-linux";
         config.allowUnfree = true;
         config.allowUnsupportedSystem = true;
@@ -48,7 +41,7 @@
     };
 
     nixosModules.default = import ./default.nix {
-      inherit inputs x86pkgs;
+      inherit inputs;
       self = self; # Required for accessing packages in default.nix
     };
   };

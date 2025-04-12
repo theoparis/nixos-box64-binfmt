@@ -1,5 +1,5 @@
 # made a box64 issue https://github.com/ptitSeb/box64/issues/2478
-{ inputs, x86pkgs, self }:
+{ inputs, self }:
 { lib, pkgs, config, ... }: let
   inherit (pkgs.stdenv.hostPlatform) system;
   cfg = config.box64-binfmt;
@@ -560,8 +560,8 @@ let
     # export VK_ICD_FILENAMES=${pkgs.swiftshader}/share/vulkan/icd.d/vk_swiftshader_icd.json; 
     export VK_ICD_FILENAMES=${pkgs.mesa.drivers}/share/vulkan/icd.d/lvp_icd.aarch64.json; # or radeon_icd.aarch64.json?(no)
 
-    export BOX64_LD_LIBRARY_PATH="${lib.concatMapStringsSep ":" (pkg: "${pkg}/lib") (steamLibs)}:$HOME/.local/share/Steam/ubuntu12_32/steam-runtime/lib/i386-linux-gnu";
-    export LD_LIBRARY_PATH="${lib.concatMapStringsSep ":" (pkg: "${pkg}/lib") (steamLibs)}:$HOME/.local/share/Steam/ubuntu12_32/steam-runtime/lib/i386-linux-gnu";
+    #export BOX64_LD_LIBRARY_PATH="${lib.concatMapStringsSep ":" (pkg: "${pkg}/lib") (steamLibs)}:$HOME/.local/share/Steam/ubuntu12_32/steam-runtime/lib/i386-linux-gnu";
+    #export LD_LIBRARY_PATH="${lib.concatMapStringsSep ":" (pkg: "${pkg}/lib") (steamLibs)}:$HOME/.local/share/Steam/ubuntu12_32/steam-runtime/lib/i386-linux-gnu";
   '';
 
   # FHS environment that spawns a bash shell by default, or runs a given command if arguments are provided
@@ -627,7 +627,6 @@ let
         fi
       '') steamLibPaths}
     '';
-
     runScript = ''
       # Enable box64 logging if needed
       ${BOX64_VARS}
@@ -682,7 +681,7 @@ in {
     
     # Uncomment these lines if you need to set extra platforms for binfmt:
     # you can use qemu-x86_64 /nix/store/ar34slssgxb42jc2kzlra86ra9cz1s7f-system-path/bin/bash, to get in a shell
-    boot.binfmt.emulatedSystems = ["i686-linux" "x86_64-linux"];
+    # boot.binfmt.emulatedSystems = ["i686-linux" "x86_64-linux"];
     #security.wrappers.bwrap.setuid = lib.mkForce false;
     # security.unprivilegedUsernsClone = true;  # Still required for bwrap
     # boot.binfmt.preferStaticEmulators = true; # segmentation faults everywhere! Maybe should open an issue?
@@ -708,7 +707,7 @@ in {
         ${BOX64_VARS}
 
         exec ${steamFHS}/bin/steam-fhs ${box64-bleeding-edge}/bin/box64-bleeding-edge \
-          ${x86pkgs.bash}/bin/bash ${x86pkgs.steam-unwrapped}/lib/steam/bin_steam.sh \
+          ${pkgs.x86.bash}/bin/bash ${pkgs.x86.steam-unwrapped}/lib/steam/bin_steam.sh \
           -no-cef-sandbox \
           -cef-disable-gpu \
           -cef-disable-gpu-compositor \
@@ -722,7 +721,7 @@ in {
         ${BOX64_VARS}
 
         exec ${steamFHS}/bin/steam-fhs ${box64-bleeding-edge}/bin/box64-bleeding-edge \
-          ${x86pkgs.bash}/bin/bash ${x86pkgs.heroic-unwrapped}/bin/heroic
+          ${pkgs.x86.bash}/bin/bash ${pkgs.x86.heroic-unwrapped}/bin/heroic
       '';
 
       # export LD_LIBRARY_PATH="${lib.makeLibraryPath steamLibsX86_64}:$LD_LIBRARY_PATH"
@@ -737,8 +736,8 @@ in {
       box64-fhs
       unstable.fex # idfk man
       #steamx86
-      x86pkgs.steam-unwrapped
-      x86pkgs.heroic-unwrapped
+      pkgs.x86.steam-unwrapped
+      pkgs.x86.heroic-unwrapped
       # steamcmdx86Wrapper
       # x86pkgs.steamcmd
       heroicx86Wrapper
@@ -746,25 +745,25 @@ in {
       #pkgs.pkgsCross.gnu32.steam
       steamFHS
       # box64-bleeding-edge
-      x86pkgs.bash #(now this one appears with whereis bash)
+      pkgs.x86.bash #(now this one appears with whereis bash)
       muvm
       # additional steam-run tools
       # steam-tui steamcmd steam-unwrapped
     ];
 
-    # boot.binfmt.registrations = {
-    #   i386-linux = {
-    #     interpreter = "${box64-fhs}/bin/box64-wrapper";
-    #     magicOrExtension = ''\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x03\x00'';
-    #     mask             = ''\xff\xff\xff\xff\xff\xfe\xfe\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff'';
-    #   };
+    boot.binfmt.registrations = {
+      i386-linux = {
+        interpreter = "${box64-fhs}/bin/box64-wrapper";
+        magicOrExtension = ''\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x03\x00'';
+        mask             = ''\xff\xff\xff\xff\xff\xfe\xfe\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff'';
+      };
 
-    #   x86_64-linux = {
-    #     interpreter = "${box64-fhs}/bin/box64-wrapper";
-    #     magicOrExtension = ''\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x3e\x00'';
-    #     mask             = ''\xff\xff\xff\xff\xff\xfe\xfe\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff'';
-    #   };
-    # };
+      x86_64-linux = {
+        interpreter = "${box64-fhs}/bin/box64-wrapper";
+        magicOrExtension = ''\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x3e\x00'';
+        mask             = ''\xff\xff\xff\xff\xff\xfe\xfe\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff'';
+      };
+    };
 
   };
 }
