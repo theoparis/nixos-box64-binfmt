@@ -265,10 +265,10 @@ let
   ];
 
   steamLibsX86_64 = with pkgs.pkgsCross.gnu64; [
-    unityhub
+    
     glibc
     glib.out
-    gtk2
+    # gtk2 unityhub at-spi2-core libdbusmenu # one of these is making a compilation error
     gdk-pixbuf
     cairo.out
     fontconfig
@@ -276,7 +276,6 @@ let
     libvdpau
     expat
     util-linux
-    at-spi2-core
     libnotify
     gnutls
     openalSoft
@@ -307,7 +306,7 @@ let
     openssl
     curl
     zlib
-    dbus-glib
+    dbus-glib # compilation error
     ncurses
     vulkan-headers
     vulkan-loader
@@ -316,7 +315,6 @@ let
     ncurses5
     ncurses6
     pkgs.curl.out
-    libdbusmenu
     xcbutilxrm
     xorg.xcbutilkeysyms
     # pango pango.out SDL2_Pango SDL_Pango # pango compile error
@@ -616,6 +614,7 @@ let
       cp -r ${box64Source}/x86lib/* $out/usr/lib64/box64-i386-linux-gnu/
 
       # Symlink Steam libraries into Box64 x86_64 directory
+      # TODO have to do the same with the 32 bit libs
       ${lib.concatMapStringsSep "\n" (pkgPath: ''
         # Symlink libraries from lib directory
         if [ -d "${pkgPath}/lib" ]; then
@@ -682,7 +681,7 @@ in {
     # you made this comment in nixos discourse: https://discourse.nixos.org/t/how-to-install-steam-x86-64-on-a-pinephone-aarch64/19297/7?u=yeshey
     
     # Uncomment these lines if you need to set extra platforms for binfmt:
-    # boot.binfmt.emulatedSystems = ["i686-linux" "x86_64-linux"];
+    boot.binfmt.emulatedSystems = ["i686-linux" "x86_64-linux"];
     # boot.binfmt.preferStaticEmulators = true; # segmentation faults everywhere! Maybe should open an issue?
     # qemu-x86_64 /nix/store/ar34slssgxb42jc2kzlra86ra9cz1s7f-system-path/bin/bash /nix/store/ar34slssgxb42jc2kzlra86ra9cz1s7f-system-path/bin/katawa-shoujo
 
@@ -750,19 +749,19 @@ in {
       # steam-tui steamcmd steam-unwrapped
     ];
 
-    boot.binfmt.registrations = {
-      i386-linux = {
-        interpreter = "${box64-fhs}/bin/box64-wrapper";
-        magicOrExtension = ''\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x03\x00'';
-        mask             = ''\xff\xff\xff\xff\xff\xfe\xfe\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff'';
-      };
+    # boot.binfmt.registrations = {
+    #   i386-linux = {
+    #     interpreter = "${box64-fhs}/bin/box64-wrapper";
+    #     magicOrExtension = ''\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x03\x00'';
+    #     mask             = ''\xff\xff\xff\xff\xff\xfe\xfe\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff'';
+    #   };
 
-      x86_64-linux = {
-        interpreter = "${box64-fhs}/bin/box64-wrapper";
-        magicOrExtension = ''\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x3e\x00'';
-        mask             = ''\xff\xff\xff\xff\xff\xfe\xfe\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff'';
-      };
-    };
+    #   x86_64-linux = {
+    #     interpreter = "${box64-fhs}/bin/box64-wrapper";
+    #     magicOrExtension = ''\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x3e\x00'';
+    #     mask             = ''\xff\xff\xff\xff\xff\xfe\xfe\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff'';
+    #   };
+    # };
 
   };
 }
