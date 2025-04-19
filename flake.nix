@@ -22,8 +22,44 @@
         system = "x86_64-linux";
         config.allowUnfree = true;
         config.allowUnsupportedSystem = true;
+        # overlays = [
+        #   (self: super: {
+        #     mesa = super.mesa.override {
+        #       # vulkanDrivers = [ "swrast" ];
+        #       # swarast gave ERROR: Feature gallium-vdpau cannot be enabled: VDPAU state tracker requires at least one of the following gallium drivers: r600, radeonsi, nouveau, d3d12 (with option gallium-d3d12-video, virgl).
+        #       # galliumDrivers = [ "llvmpipe" "softpipe" "nouveau" "virgl" ];
+
+        #       vulkanDrivers = [
+        #         "amd" # AMD (aka RADV)
+        #         "intel" # new Intel (aka ANV)
+        #         "microsoft-experimental" # WSL virtualized GPU (aka DZN/Dozen)
+        #         "nouveau" # Nouveau (aka NVK)
+        #         "swrast" # software renderer (aka Lavapipe)
+        #       ];
+
+        #       # https://nixos.wiki/wiki/Mesa
+        #       # and
+        #       # https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/libraries/mesa/default.nix
+        #       galliumDrivers =     [
+        #         "d3d12" # WSL emulated GPU (aka Dozen)
+        #         "iris" # new Intel (Broadwell+)
+        #         "llvmpipe" # software renderer
+        #         "nouveau" # Nvidia
+        #         "r300" # very old AMD
+        #         "r600" # less old AMD
+        #         "radeonsi" # new AMD (GCN+)
+        #         "softpipe" # older software renderer
+        #         "svga" # VMWare virtualized GPU
+        #         "virgl" # QEMU virtualized GPU (aka VirGL)
+        #         "zink" # generic OpenGL over Vulkan, experimental
+        #       ];
+        #     };
+        #   })
+        # ];
       };
     };
+
+
 
   in {
     packages = eachSystem (system: {

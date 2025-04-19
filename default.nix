@@ -681,7 +681,27 @@ in {
     
     # Uncomment these lines if you need to set extra platforms for binfmt:
     # you can use qemu-x86_64 /nix/store/ar34slssgxb42jc2kzlra86ra9cz1s7f-system-path/bin/bash, to get in a shell
-    # boot.binfmt.emulatedSystems = ["i686-linux" "x86_64-linux"];
+    boot.binfmt.emulatedSystems = ["i686-linux" "x86_64-linux" "i386-linux" "i486-linux" "i586-linux" "i686-linux"];
+    # services.qemuGuest.enable = true;
+
+    # virtualisation.vmVariant = {
+    #   # following configuration is added only when building VM with build-vm
+    #   virtualisation.cores = 1;
+    # };
+    #virtualisation.qemu.options = [ "-display gtk,gl=on" ];
+
+    # Ensure binfmt service is properly registered
+    # boot.binfmt.registrations = {
+    #   i686 = {
+    #     interpreter = "${pkgs.qemu-user}/bin/qemu-i386";
+    #     magicOrExtension = ''\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x03\x00'';
+    #   };
+    #   x86_64 = {
+    #     interpreter = "${pkgs.qemu-user}/bin/qemu-x86_64";
+    #     magicOrExtension = ''\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x3e\x00'';
+    #   };
+    # };
+
     #security.wrappers.bwrap.setuid = lib.mkForce false;
     # security.unprivilegedUsernsClone = true;  # Still required for bwrap
     # boot.binfmt.preferStaticEmulators = true; # segmentation faults everywhere! Maybe should open an issue?
@@ -696,7 +716,7 @@ in {
 
 
     # nix.settings.extra-platforms = config.boot.binfmt.emulatedSystems;
-    nix.settings.extra-platforms = ["i686-linux" "x86_64-linux"];
+    nix.settings.extra-platforms = ["i686-linux" "x86_64-linux" "i386-linux" "i486-linux" "i586-linux" "i686-linux"];
     nixpkgs.config.allowUnsupportedSystem = true;
 
 
@@ -716,13 +736,13 @@ in {
           steam://open/minigameslist "$@"
       '';
 
-      heroicx86Wrapper = pkgs.writeScriptBin "box64-bashx86-heroicx86-wrapper" ''
-        #!${pkgs.bash}/bin/sh
-        ${BOX64_VARS}
+      # heroicx86Wrapper = pkgs.writeScriptBin "box64-bashx86-heroicx86-wrapper" ''
+      #   #!${pkgs.bash}/bin/sh
+      #   ${BOX64_VARS}
 
-        exec ${steamFHS}/bin/steam-fhs ${box64-bleeding-edge}/bin/box64-bleeding-edge \
-          ${pkgs.x86.bash}/bin/bash ${pkgs.x86.heroic-unwrapped}/bin/heroic
-      '';
+      #   exec ${steamFHS}/bin/steam-fhs ${box64-bleeding-edge}/bin/box64-bleeding-edge \
+      #     ${pkgs.x86.bash}/bin/bash ${pkgs.x86.heroic-unwrapped}/bin/heroic
+      # '';
 
       # export LD_LIBRARY_PATH="${lib.makeLibraryPath steamLibsX86_64}:$LD_LIBRARY_PATH"
       glmark2-x86 = pkgs.writeShellScriptBin "glmark2-x86" ''
@@ -737,10 +757,10 @@ in {
       unstable.fex # idfk man
       #steamx86
       pkgs.x86.steam-unwrapped
-      pkgs.x86.heroic-unwrapped
+      # pkgs.x86.heroic-unwrapped
       # steamcmdx86Wrapper
       # x86pkgs.steamcmd
-      heroicx86Wrapper
+      # heroicx86Wrapper
       steamx86Wrapper
       #pkgs.pkgsCross.gnu32.steam
       steamFHS
@@ -749,21 +769,69 @@ in {
       muvm
       # additional steam-run tools
       # steam-tui steamcmd steam-unwrapped
+
+      # qemu-user    # Explicitly include QEMU user-mode emulators
     ];
 
-    boot.binfmt.registrations = {
-      i386-linux = {
-        interpreter = "${box64-fhs}/bin/box64-wrapper";
-        magicOrExtension = ''\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x03\x00'';
-        mask             = ''\xff\xff\xff\xff\xff\xfe\xfe\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff'';
-      };
+    # boot.binfmt.registrations = {
+    #   i386-linux = {
+    #     interpreter = "${box64-fhs}/bin/box64-wrapper";
+    #     magicOrExtension = ''\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x03\x00'';
+    #     mask             = ''\xff\xff\xff\xff\xff\xfe\xfe\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff'';
+    #   };
 
-      x86_64-linux = {
-        interpreter = "${box64-fhs}/bin/box64-wrapper";
-        magicOrExtension = ''\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x3e\x00'';
-        mask             = ''\xff\xff\xff\xff\xff\xfe\xfe\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff'';
-      };
-    };
+    #   x86_64-linux = {
+    #     interpreter = "${box64-fhs}/bin/box64-wrapper";
+    #     magicOrExtension = ''\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x3e\x00'';
+    #     mask             = ''\xff\xff\xff\xff\xff\xfe\xfe\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff'';
+    #   };
+    # };
+
+# https://chat.deepseek.com/a/chat/s/482c6d4b-615c-43a8-98b0-e2e8e0446102
+/*
+{ config, pkgs, ... }:
+
+let
+  x86Pkgs = pkgs.pkgsCross.x86_64-linux;
+  x86Config = { config, pkgs, ... }: {
+    nixpkgs.system = "x86_64-linux";
+    environment.systemPackages = with x86Pkgs; [
+      bash
+      coreutils
+      # Add other packages here
+    ];
+  };
+  x86Eval = import (pkgs.path + "/nixos/lib/eval-config.nix") {
+    system = "x86_64-linux";
+    modules = [ x86Config ];
+  };
+  x86System = x86Eval.config.system.build.toplevel;
+in
+
+{
+  boot.binfmt.emulatedSystems = [ "x86_64-linux" ];
+  nix.settings.extra-platforms = [ "x86_64-linux" ];
+
+  system.activationScripts.x86Chroot = ''
+    mkdir -p /var/x86-chroot
+    ln -sf ${x86System}/* /var/x86-chroot/
+  '';
+
+  environment.systemPackages = [
+    (pkgs.writeScriptBin "enter-x86-chroot" ''
+      #!/bin/sh
+      CHROOT_DIR="/var/x86-chroot"
+      mkdir -p $CHROOT_DIR/{proc,dev,sys}
+
+      mount --bind /proc $CHROOT_DIR/proc
+      mount --bind /dev $CHROOT_DIR/dev
+      mount --bind /sys $CHROOT_DIR/sys
+
+      exec ${pkgs.qemu}/bin/qemu-x86_64-static $CHROOT_DIR/bin/chroot $CHROOT_DIR "$@"
+    '')
+  ];
+}
+ */
 
   };
 }
