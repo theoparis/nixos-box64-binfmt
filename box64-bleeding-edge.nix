@@ -6,9 +6,11 @@
   gitUpdater,
   cmake,
   python3,
-  withDynarec ? (
-    stdenv.hostPlatform.isAarch64 || stdenv.hostPlatform.isRiscV64 || stdenv.hostPlatform.isLoongArch64
-  ),
+  # TODO: https://github.com/ptitSeb/box64/issues/2484
+  withDynarec ? false,
+  # withDynarec ? (
+    # stdenv.hostPlatform.isAarch64 || stdenv.hostPlatform.isRiscV64 || stdenv.hostPlatform.isLoongArch64
+  # ),
   runCommand,
   hello-x86_64,
 }:
@@ -17,7 +19,7 @@ stdenv.mkDerivation (finalAttrs: {
   pname = "box64-bleeding-edge";
   #version = "0.3.4";
   #version = "c40f9651bc51c0f3446484233d6ce63d05ec4b7b";
-  version = "b472459a22169c1bf1932f5e69577ac149c1b2d7";
+  version = "35fa13899a09334d598e230917965ae9ae1aa992";
   binaryName = "box64-bleeding-edge";
   doCheck = false;
 
@@ -26,7 +28,7 @@ stdenv.mkDerivation (finalAttrs: {
     repo = "box64";
     #rev = "v${finalAttrs.version}";
     rev = "${finalAttrs.version}";
-    hash = "sha256-hInhl9Zmj4SwCUt4OFbN7yvN9MyBW2ImyhLnDgUqL5Q=";
+    hash = "sha256-9j1XNjsW+AQPxsLLYhEX+DJ6eo9EldIjvq8kSBdEeSY=";
   };
 
   nativeBuildInputs = [
