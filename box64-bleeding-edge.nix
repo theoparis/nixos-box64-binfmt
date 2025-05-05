@@ -9,7 +9,7 @@
   # TODO: https://github.com/ptitSeb/box64/issues/2484
   withDynarec ? false,
   # withDynarec ? (
-    # stdenv.hostPlatform.isAarch64 || stdenv.hostPlatform.isRiscV64 || stdenv.hostPlatform.isLoongArch64
+  # stdenv.hostPlatform.isAarch64 || stdenv.hostPlatform.isRiscV64 || stdenv.hostPlatform.isLoongArch64
   # ),
   runCommand,
   hello-x86_64,

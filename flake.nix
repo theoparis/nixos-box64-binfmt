@@ -85,7 +85,6 @@
 
       nixosModules.default = import ./default.nix {
         inherit inputs;
-        self = self; # Required for accessing packages in default.nix
       };
     };
 }

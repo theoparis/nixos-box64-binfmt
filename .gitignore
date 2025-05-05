@@ -147,3 +147,5 @@ zsdoc/data
 !/tests/_output/.gitkeep
 
 # End of https://www.toptal.com/developers/gitignore/api/linux,visualstudiocode,direnv,vim,emacs,zsh
+result
+result-*

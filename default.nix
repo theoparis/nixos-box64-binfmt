@@ -1,5 +1,5 @@
 # made a box64 issue https://github.com/ptitSeb/box64/issues/2478
-{ inputs, self }:
+{ inputs }:
 {
   lib,
   pkgs,
@@ -17,7 +17,6 @@ let
 
   # Grouped common libraries needed for the FHS environment (64-bit ARM versions)
   steamLibs = with pkgs; [
-    unityhub
     harfbuzzFull
     glibc
     glib.out
@@ -41,7 +40,6 @@ let
     xorg.libxcb
     libva
     gcc-unwrapped.lib
-    libgccjit
     libpng
     libpulseaudio
     libjpeg
@@ -68,7 +66,6 @@ let
     ncurses
 
     libva
-    mesa.drivers
     mesa
     ncurses5
     ncurses6
@@ -160,181 +157,27 @@ let
     SDL2_ttf
     bzip2
 
-    SDL
     sdl3
     SDL2
     sdlpop
-    SDL_ttf
-    SDL_net
-    SDL_gpu
-    SDL_gfx
     sdlookup
     SDL2_ttf
     SDL2_net
     SDL2_gfx
-    SDL_sound
-    SDL_sixel
-    SDL_mixer
-    SDL_image
-    SDL_Pango
-    sdl-jstest
-    SDL_compat
     SDL2_sound
     SDL2_mixer
     SDL2_image
     SDL2_Pango
-    SDL_stretch
-    SDL_audiolib
-    SDL2_mixer_2_0
-    SDL2_image_2_6
-    SDL2_image_2_0
 
-    #libstdcxx5
     libcdada
-    libgcc
 
     swiftshader # CPU implementation of vulkan
 
     libGL
     xapp
     libunity
-    libselinux # libselinux
-
-    python3
-    wayland
-    wayland-protocols
-    patchelf
-    libGLU
-    fribidi
-    brotli
-    fribidi.out
-    brotli.out
-  ];
-  steamLibsI686 = with pkgs.pkgsCross.gnu32; [
-    unityhub
-    glibc
-    glib.out
-    gtk2
-    gdk-pixbuf
-    cairo.out
-    fontconfig
-    libdrm
-    libvdpau
-    expat
-    util-linux
-    at-spi2-core
-    libnotify
-    gnutls
-    openalSoft
-    udev
-    xorg.libXinerama
-    xorg.libXdamage
-    xorg.libXScrnSaver
-    xorg.libxcb
-    libva
-    libpng
-    libpulseaudio
-    libjpeg
-    libvorbis
-    stdenv.cc.cc.lib
-    xorg.libX11
-    xorg.libXext
-    xorg.libXrender
-    xorg.libXfixes
-    xorg.libXcursor
-    xorg.libXi
-    xorg.libXcomposite
-    xorg.libXtst
-    xorg.libSM
-    xorg.libICE
-    libGL
-    libglvnd
-    freetype
-    openssl
-    curl
-    zlib
-    dbus-glib
-    ncurses
-    vulkan-headers
-    vulkan-loader
-    vulkan-tools
-    mesa.drivers
-    ncurses5
-    ncurses6
-    pkgs.curl.out
-    libdbusmenu
-    xcbutilxrm
-    xorg.xcbutilkeysyms
-    # pango pango.out SDL2_Pango SDL_Pango # pango compile error
-    gtk3-x11
-    libmpg123
-    # ibus-engines.libpinyin Error libpiny
-    libnma
-    libnma-gtk4
-    libappindicator
-    libappindicator-gtk3
-    libappindicator-gtk2
-    nss
-    nspr
-    libudev-zero
-    libusb1
-    # ibus-engines.kkc libkkc error
-    gtk3
-    xdg-utils
-    vulkan-validation-layers
-    zenity
-    xorg.libXrandr
-    dbus
-    libnsl
-    # libunity # dee package error caused by this
-    pciutils
-    openal
-    passt
-    cups
-    alsa-lib
-    libxslt
-    zstd
-    xorg.libxshmfence
-    avahi
-    xorg.libpciaccess
-    elfutils
-    lm_sensors
-    libffi
-    flac
-    libogg
-    libbsd
-    libxml2
-    llvmPackages.libllvm
-    libdrm.out
-    unstable.libgbm
-    unstable.libgbm.out
-    libcap
-    libcap_ng
-    libcaption
-    gmp
-    gmpxx
-    libgmpris
-    SDL2
-    SDL2_image
-    SDL2_ttf
-    bzip2
-    sdlookup
-    SDL2_net
-    SDL2_gfx
-    #  SDL_sound SDL2_sound # SLD_SOUND error
-    SDL_sixel
-    sdl-jstest
-    SDL_compat
-
-    # SDL_stretch SDL STREACH ERROR
-    SDL_audiolib
-    SDL2_image_2_6
-    SDL2_image_2_0
-    # SDL2_mixer SDL_mixer SDL2_mixer_2_0 # timidity error
-    libcdada
-    libgcc
-    # xapp mate components? GIVES ERROR, ALSO, WHY would i need
     libselinux
+
     python3
     wayland
     wayland-protocols
@@ -344,17 +187,7 @@ let
     brotli
     fribidi.out
     brotli.out
-
-    # Comments moved below:
-    # libstdcxx5 ?
-    # gcc-unwrapped.lib libgccjitga (gcc jit error)
-    # libdbusmenu: causing Error: detected mismatched Qt dependencies when compiled for steamLibsI686 (maybe not)
-    # sbclPackages.cl-cairo2-xlib sbcl error?
-    # SDL sdl3 SDL2 sdlpop SDL_ttf SDL_net SDL_gpu SDL_gfx (-baseqt conflict error)
-    # swiftshader (CPU implementation of vulkan)
-    # libcef (https://github.com/ptitSeb/box64/issues/1383) error: unsupported system i686-linux
   ];
-
   steamLibsX86_64_GL = with pkgs.pkgsCross.gnu64; [
     libGL
   ];
@@ -406,7 +239,6 @@ let
     vulkan-headers
     vulkan-loader
     vulkan-tools
-    mesa.drivers
     ncurses5
     ncurses6
     pkgs.curl.out
@@ -453,8 +285,8 @@ let
     libxml2
     llvmPackages.libllvm
     libdrm.out
-    unstable.libgbm
-    unstable.libgbm.out
+    libgbm
+    libgbm.out
     libcap
     libcap_ng
     libcaption
@@ -468,18 +300,8 @@ let
     sdlookup
     SDL2_net
     SDL2_gfx
-    #  SDL_sound SDL2_sound # SLD_SOUND error
-    SDL_sixel
-    sdl-jstest
-    SDL_compat
 
-    # SDL_stretch SDL STREACH ERROR
-    SDL_audiolib
-    SDL2_image_2_6
-    SDL2_image_2_0
-    # SDL2_mixer SDL_mixer SDL2_mixer_2_0 # timidity error
     libcdada
-    libgcc
     # xapp mate components? GIVES ERROR, ALSO, WHY would i need
     libselinux
     python3
@@ -656,18 +478,18 @@ let
 
     # # vulkaninfo should work with CPU now, probably should remove if I MAKE THIS WORK
     # export VK_ICD_FILENAMES=${pkgs.swiftshader}/share/vulkan/icd.d/vk_swiftshader_icd.json; 
-    export VK_ICD_FILENAMES=${pkgs.mesa.drivers}/share/vulkan/icd.d/lvp_icd.aarch64.json; # or radeon_icd.aarch64.json?(no)
+    export VK_ICD_FILENAMES=${pkgs.mesa}/share/vulkan/icd.d/lvp_icd.aarch64.json; # or radeon_icd.aarch64.json?(no)
 
     #export BOX64_LD_LIBRARY_PATH="${
-      lib.concatMapStringsSep ":" (pkg: "${pkg}/lib") (steamLibs)
+      lib.concatMapStringsSep ":" (pkg: "${pkg}/lib") steamLibs
     }:$HOME/.local/share/Steam/ubuntu12_32/steam-runtime/lib/i386-linux-gnu";
     #export LD_LIBRARY_PATH="${
-      lib.concatMapStringsSep ":" (pkg: "${pkg}/lib") (steamLibs)
+      lib.concatMapStringsSep ":" (pkg: "${pkg}/lib") steamLibs
     }:$HOME/.local/share/Steam/ubuntu12_32/steam-runtime/lib/i386-linux-gnu";
   '';
 
   # FHS environment that spawns a bash shell by default, or runs a given command if arguments are provided
-  steamFHS = pkgs.buildFHSUserEnv {
+  steamFHS = pkgs.buildFHSEnv {
     name = "steam-fhs";
     targetPkgs =
       pkgs:
@@ -849,7 +671,6 @@ in
     nixpkgs.config.allowUnsupportedSystem = true;
 
     environment.systemPackages =
-      with pkgs;
       let
 
         steamx86Wrapper = pkgs.writeScriptBin "box64-bashx86-steamx86-wrapper" ''
@@ -857,7 +678,7 @@ in
           ${BOX64_VARS}
 
           exec ${steamFHS}/bin/steam-fhs ${box64-bleeding-edge}/bin/box64-bleeding-edge \
-            ${pkgs.x86.bash}/bin/bash ${pkgs.x86.steam-unwrapped}/lib/steam/bin_steam.sh \
+            ${pkgs.pkgsCross.gnu32.bash}/bin/bash ${pkgs.pkgsCross.gnu32.steam-unwrapped}/lib/steam/bin_steam.sh \
             -no-cef-sandbox \
             -cef-disable-gpu \
             -cef-disable-gpu-compositor \
@@ -885,9 +706,8 @@ in
         # steam-related packages
         glmark2-x86
         box64-fhs
-        unstable.fex # idfk man
         #steamx86
-        pkgs.x86.steam-unwrapped
+        pkgs.pkgsCross.gnu32.steam-unwrapped
         # pkgs.x86.heroic-unwrapped
         # steamcmdx86Wrapper
         # x86pkgs.steamcmd
@@ -896,8 +716,7 @@ in
         #pkgs.pkgsCross.gnu32.steam
         steamFHS
         # box64-bleeding-edge
-        pkgs.x86.bash # (now this one appears with whereis bash)
-        muvm
+        pkgs.pkgsCross.gnu32.bash # (now this one appears with whereis bash)
         # additional steam-run tools
         # steam-tui steamcmd steam-unwrapped
 
